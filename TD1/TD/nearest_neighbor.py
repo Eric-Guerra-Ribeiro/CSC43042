@@ -4,7 +4,7 @@ nearest_neighbor module
 
 import abc
 from abc import ABC
-from typing import Callable
+from typing import Callable, Tuple
 
 import numpy as np
 
@@ -18,9 +18,7 @@ def euclidean_distance(x_1: np.ndarray, x_2: np.ndarray) -> float:
     :return: Euclidean distance between x_1 and x_2
     :rtype: float
     """
-    # Ex1
-    pass
-    return
+    return np.linalg.norm(x_1 - x_2)
 
 
 class NearestNeighborSearch(ABC):
@@ -39,7 +37,7 @@ class NearestNeighborSearch(ABC):
         self.metric = metric
 
     @abc.abstractmethod
-    def query(self, x: np.ndarray) -> (float, int):
+    def query(self, x: np.ndarray) -> Tuple[float, int]:
         """Return distance to and index of nearest neighbor of x in original
         data X"""
         assert x.ndim == 1, "Query point x must be 1D"

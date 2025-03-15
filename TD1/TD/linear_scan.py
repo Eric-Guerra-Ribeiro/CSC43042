@@ -12,6 +12,9 @@ class LinearScan(NearestNeighborSearch):
         # Store the index of nearest neighbor
         nearest_neighbor_index = -1
         current_min_dist = np.inf
-        # Ex2: Loop through points
-        pass
+        for i, point in enumerate(self.X):
+            dist = self.metric(x, point)
+            if dist < current_min_dist:
+                current_min_dist = dist
+                nearest_neighbor_index = i
         return current_min_dist, nearest_neighbor_index

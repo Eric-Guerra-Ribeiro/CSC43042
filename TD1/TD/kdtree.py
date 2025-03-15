@@ -15,9 +15,9 @@ def median(X: np.ndarray, start: int, stop: int, c: int) -> float:
     """
     assert stop - start >= 0, "Requested stop > start"
     assert X.ndim == 2, "2D required"
-    med = np.inf
-    # Ex3
-    pass
+    sliced_X = X[start:stop]
+    sorted_array = sliced_X[sliced_X[:, c].argsort()]
+    med = sorted_array[(stop - start)//2, c]
     return med
 
 
@@ -30,11 +30,8 @@ def partition(X: np.ndarray, start: int, stop: int, c: int) -> int:
     """
     Partitions the array X between start and stop wrt to its median along a coordinate c
     """
-    # Ex4
-    # You may or may not use the median function above, up to you
-    # med = median(X, start, stop, c)
-    idx = -1
-    pass
+    idx = (start + stop)//2
+    X[start:stop] = X[start:stop][X[start:stop, c].argsort()]
     return idx
 
 
@@ -70,9 +67,15 @@ class KDTree(NearestNeighborSearch):
             return
         if stop == start + 1:
             return Node(start)
+        
+        median_idx = partition(self.X, start, stop, c)
         next_c = (c + 1) % self.dim
-        # Ex5: iteratively partition, retrieve median and recurse (while creating correct Nodes)
-        pass
+
+        return Node(
+            median_idx, self.X[median_idx, c], c,
+            self._build(start, median_idx, next_c),
+            self._build(median_idx + 1, stop, next_c)
+        )
 
     def reset(self):
         """
@@ -94,8 +97,16 @@ class KDTree(NearestNeighborSearch):
         """
         if node is None:
             return
-        # Ex6
-        pass
+
+        dist = self.metric(x, self.X[node.idx])
+        if self._current_dist > dist:
+            self._current_dist = dist
+            self._current_idx = node.idx
+    
+        if x[node.c] < node.med:
+            self._defeatist(node.left, x)
+        else:
+            self._defeatist(node.right, x)
 
     def _backtracking(self, node: Node | None, x: np.ndarray):
         """
@@ -103,8 +114,20 @@ class KDTree(NearestNeighborSearch):
         """
         if node is None:
             return
-        # Ex7
-        pass
+
+        dist = self.metric(x, self.X[node.idx])
+        if self._current_dist > dist:
+            self._current_dist = dist
+            self._current_idx = node.idx
+    
+        if x[node.c] < node.med:
+            self._backtracking(node.left, x)
+            if x[node.c] + self._current_dist > node.med:
+                self._backtracking(node.right, x)
+        else:
+            self._backtracking(node.right, x)
+            if x[node.c] - self._current_dist < node.med:
+                self._backtracking(node.left, x)
 
     def query(self, x, mode: str = "backtracking"):
         """
@@ -121,5 +144,4 @@ class KDTree(NearestNeighborSearch):
         return self._current_dist, self._current_idx
 
     def set_xaggle_config(self):
-        self.mode = None  # Choose search strategy for xaggle
-        pass
+        self.mode = "defeatist"
