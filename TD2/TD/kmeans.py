@@ -2,7 +2,6 @@ from __future__ import annotations
 import random
 
 import numpy as np
-from scipy.spatial import KDTree
 
 
 class Point:
@@ -119,3 +118,38 @@ class Cloud:
                 cum_sum += probabilities[j]
                 j += 1
             self.centers[i].update_coords(self.points[j - 1].coords)
+
+    def silhouette(self, point:Point) -> float:
+        """Calculates the silhouette of a point"""
+        number_in_clusters = np.zeros(self.k, dtype=int)
+        mean_distance = np.zeros(self.k, dtype=float)
+
+        for other_point in self.points:
+            number_in_clusters[other_point.label] += 1
+            mean_distance[other_point.label] += np.sqrt(point.squared_dist(other_point))
+
+
+        # If point i is alone in cluster, we define s(i) = 0
+        if number_in_clusters[point.label] == 1:
+            return 0.
+
+        # To avoid problems, if all points are in the same cluster, we'll assume s(i) = 1
+        if number_in_clusters[point.label] == len(self.points):
+            return 1.
+
+        # a(i) = 1/(|C_I| - 1)* \sum_{j \in C_I, i != j} d(i, j)
+        a_point = mean_distance[point.label]/(number_in_clusters[point.label] - 1)
+
+        for i in range(self.k):
+            if number_in_clusters[i] == 0 or i == point.label:
+                mean_distance[i] = np.inf
+                continue
+            mean_distance[i] = mean_distance[i]/number_in_clusters[i]
+        
+        # b(i) = min J != I: 1/(C_J) * \sum_{j \in C_J} d(i, j)
+        b_point = np.min(mean_distance)
+
+        return (b_point - a_point)/max(a_point, b_point)
+            
+    def mean_silhouette(self):
+        return sum(self.silhouette(point) for point in self.points)/len(self.points)
