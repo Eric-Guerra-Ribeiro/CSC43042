@@ -1,3 +1,5 @@
+from typing import List
+
 import numpy as np
 from TD.cloud import Point, Cloud
 
@@ -23,6 +25,9 @@ class Edge:
 
     # TODO: Exercise 3
     pass
+
+    def __lt__(self, other):
+        return self.length < other.length
 
 
 class Graph:
@@ -76,17 +81,16 @@ class Graph:
         """The i-th edge of the (length-sorted) edge list."""
         return self.edges[i]
 
-    def add_nodes(self, ns: [str]) -> None:
+    def add_nodes(self, ns: List[str]) -> None:
         """Add a list of (names of) nodes to the graph."""
-        # TODO: Exercise 4
-        pass
+        self.node_names.extend(ns)
 
-    def add_edges(self, es: [Edge]) -> None:
+    def add_edges(self, es: List[Edge]) -> None:
         """Add a list of edges to the graph,
         maintaining the length-sorted invariant.
         """
-        # TODO: Exercise 4
-        pass
+        self.edges.extend(es)
+        self.edges.sort()
 
 
 def graph_from_cloud(c: Cloud):
@@ -95,19 +99,23 @@ def graph_from_cloud(c: Cloud):
     distance between them.
     """
     res = Graph()
-    # TODO: Exercise 5
-    pass
+    nodes = [point.name for point in c]
+    edges = [Edge(j, i, point1.dist(c[j])) for i, point1 in enumerate(c) for j in range(i + 1, len(c))]
+    res.add_nodes(nodes)
+    res.add_edges(edges)
     return res
 
 
-def graph_from_matrix(node_names: [str], dist_matrix: [[float]]):
+def graph_from_matrix(node_names: List[str], dist_matrix: List[List[float]]):
     """Construct the complete graph on the given list of node names
     with the length of the edge between nodes i and j given by the
     (i,j)-th entry of the matrix.
     """
+    n = len(node_names)
     res = Graph()
-    # TODO: Exercise 6
-    pass
+    edges = [Edge(j, i, dist_matrix[i][j]) for i in range(n) for j in range(i + 1, n)]
+    res.add_nodes(node_names)
+    res.add_edges(edges)
     return res
 
 
@@ -117,6 +125,8 @@ def graph_from_matrix_file(filename):
     names; and the following n lines are the rows of the distance matrix
     (n entries per line, comma-separated).
     """
-    # TODO: Exercise 6
-    pass
-
+    with open(filename, 'r') as infile:
+        n = int(infile.readline())
+        labels = [infile.readline().strip() for _ in range(n)]
+        dist_matrix = [[float(x) for x in line.split(',')] for line in infile]
+        return graph_from_matrix(labels, dist_matrix)

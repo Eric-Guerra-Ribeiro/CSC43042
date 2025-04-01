@@ -62,28 +62,38 @@ class Dendrogram:
         for the cluster containing node i.
         """
         assert 0 <= i < self.g.node_count()
-        result = i
-        # TODO: Exercise 4
-        pass
-        return result
+        parent = self.parent[i]
+        while parent != -1:
+            i = parent
+            parent = self.parent[i]
+        return i
 
     def merge(self, e: Edge):
         """Merge the clusters connected by the edge."""
-        # TODO: Exercise 8
         # Plan:
         # 1. Find the representatives
         # 2. Choose the highest
         # 3. Adjust parent, left, and down
         # 4. Update ranks
         # 5. Update heights
-        pass
+        rep1 = self.find_rep(e.p1)
+        rep2 = self.find_rep(e.p2)
+        if self.rank[rep2] > self.rank[rep1]:
+            rep1, rep2 = rep2, rep1
+
+        self.rank[rep1] = max(self.rank[rep2] + 1, self.rank[rep1])
+        self.parent[rep2] = rep1
+        self.left[rep2] = self.down[rep1]
+        self.down[rep1] = rep2
+        self.height[rep2] = 0.5*e.length
 
     def build(self):
         """Merge along each edge in non-decreasing length order
         to build the dendrogram.
         """
-        # TODO: Exercise 9
-        pass
+        for edge in self.g:
+            if self.find_rep(edge.p1) != self.find_rep(edge.p2):
+                self.merge(edge)
 
     def find_heights(self, eps: float):
         """Put all heights <= eps into list of significant heights."""
@@ -101,8 +111,20 @@ class Dendrogram:
 
     def _set_clusters(self, i: int, h: float):
         assert 0 <= i < self.get_n()
-        # TODO: Exercise 10
-        pass
+
+        # Root of Cluster
+        if self.parent[i] == -1 or self.height[i] > h:
+            self.cluster[i] = i
+            self.total_clusters += 1
+        # Not root of cluster
+        else:
+            self.cluster[i] = self.cluster[self.parent[i]]
+        
+        # Exploring to the left and down
+        for node in [self.left[i], self.down[i]]:
+            if node == -1:
+                continue
+            self._set_clusters(node, h)
 
     def set_clusters(self, h: float):
         """(Re)set clusters with cut height h."""
@@ -114,8 +136,16 @@ class Dendrogram:
     def _count_ns_clusters(self):
         """Count non-singleton clusters from scratch"""
         count = 0
-        # TODO: Exercise 11
-        pass
+        seen_at_least_once = set()
+        seen_more_than_once = set()
+
+        for cluster in self.cluster:
+            if cluster not in seen_at_least_once:
+                seen_at_least_once.add(cluster)
+            elif cluster not in seen_more_than_once:
+                seen_more_than_once.add(cluster)
+                count += 1
+
         return count
 
     def count_ns_clusters(self) -> int:
@@ -138,10 +168,22 @@ class Dendrogram:
         have been computed using set_clusters(h).
         """
         assert 0 <= cluster < self.get_n()
-        # TODO: Exercise 12
-        pass
+        
+        nodes_in_cluster = [i for i, cluster_ in enumerate(self.cluster) if cluster_ == cluster]
 
-        return 0  # Unreachable!
+        if len(nodes_in_cluster) <= 1:
+            return 0.
+    
+        height = -1
+
+        for node in nodes_in_cluster:
+            if self.height[node] >= self.cut_height:
+                return self.cut_height
+            
+            height = max(height, self.height[node])
+        
+        return height
+
 
     # /*** GETTERS ***/
 

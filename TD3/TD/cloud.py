@@ -1,5 +1,6 @@
 # module cloud
 """Minimal implementation of data points and clouds."""
+from typing import List
 
 import numpy as np
 
@@ -15,7 +16,7 @@ class Point:
         name: str = ''
     """
 
-    def __init__(self, coords : [float], name=''):
+    def __init__(self, coords : List[float], name=''):
         self.coords = np.array(coords)
         self.name = name
 
@@ -71,4 +72,3 @@ def load_cloud_from_file(infile):
         name = parts[-1].strip()
         c.add_point(Point(coords, name))
     return c
-

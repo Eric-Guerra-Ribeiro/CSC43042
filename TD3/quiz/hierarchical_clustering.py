@@ -3,6 +3,8 @@ import matplotlib.pyplot as plt
 from scipy.cluster.hierarchy import dendrogram, linkage
 from scipy.spatial.distance import squareform
 
+import math
+
 def analyse_bluered():
     fname = './csv/bluered.csv'
     data = pd.read_csv(fname, header = 0)
@@ -15,6 +17,14 @@ def analyse_bluered():
 def analyse_test6():
     fname = './csv/test6.csv'
     data = pd.read_csv(fname, header = 0)
+
+    print("Test 6:")
+    print("     A      B      C      D      E     F")
+    for x0, y0, letter in zip(data.x, data.y, ["A", "B", "C", "D", "E", "F"]):
+        print(f"{letter}", end=" ")
+        for x1, y1 in zip(data.x, data.y):
+            print(f"{math.sqrt((x0-x1)**2 + (y0-y1)**2): .3f}", end=" ")
+        print()
 
     tree = linkage(data[['x', 'y']])
     D = dendrogram(tree, labels = data['name'].to_numpy(), orientation = 'left')
@@ -54,7 +64,7 @@ def analyse_languages():
     plt.show()
 
 if __name__ == "__main__":
-    # analyse_bluered()
+    analyse_bluered()
     analyse_test6()
-    # analyse_iris()
-    # analyse_languages()
+    analyse_iris()
+    analyse_languages()
