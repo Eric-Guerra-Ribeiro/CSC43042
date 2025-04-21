@@ -10,8 +10,8 @@ from TD.knn_application import *
 
 def main():
     # Read data
-    train_ds = Dataset("../csv/samples_train.csv")
-    test_ds = Dataset("../csv/samples_test_excerpt.csv")
+    train_ds = Dataset("./csv/samples_train.csv")
+    test_ds = Dataset("./csv/samples_test_excerpt.csv")
     col_class = train_ds.dim - 1
 
     # Your data

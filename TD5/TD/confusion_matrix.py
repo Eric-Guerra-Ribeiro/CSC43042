@@ -5,15 +5,15 @@ class ConfusionMatrix:
     """A confusion matrix
 
     Attributes:
-        confusion_matrix: np.ndarray -- The actual 2×2 confusion matrix
+        confusion_matrix: np.ndarray -- The actual 2x2 confusion matrix
     """
 
     def __init__(self) -> None:
-        pass
+        self.confusion_matrix = np.zeros((2, 2), dtype=int)
 
     def add_prediction(self, true_label: int, predicted_label: int) -> None:
         """Add a labeled point to the matrix."""
-        pass
+        self.confusion_matrix[true_label, predicted_label] += 1
 
     @property
     def tp(self) -> int:
@@ -37,23 +37,23 @@ class ConfusionMatrix:
 
     def f_score(self) -> float:
         """Compute the F-score."""
-        pass
+        return 2*self.precision()*self.detection_rate()/(self.precision() + self.detection_rate())
 
     def precision(self) -> float:
         """Compute the precision."""
-        pass
+        return self.tp/(self.tp + self.fp)
 
     def error_rate(self) -> float:
         """Compute the error rate."""
-        pass
+        return (self.fp + self.fn)/(self.fp + self.fn + self.tp + self.tn)
 
     def detection_rate(self) -> float:
         """Compute the detection rate."""
-        pass
+        return self.tp/(self.tp + self.fn)
 
     def false_alarm_rate(self) -> float:
         """Compute the false-alarm rate."""
-        pass
+        return self.fp/(self.fp + self.tn)
 
     def print_evaluation(self) -> None:
         """Print a summary of the values of the matrix."""

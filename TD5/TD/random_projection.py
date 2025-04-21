@@ -1,6 +1,8 @@
 import numpy as np
 from math import sqrt
 
+from sklearn.random_projection import GaussianRandomProjection
+
 from TD.dataset import Dataset
 
 
@@ -22,12 +24,19 @@ class RandomProjection:
         projection_dim: int,
         type_sample: str,
     ):
-        pass
+        self.original_dimension = original_dimension
+        self.col_class = col_class
+        self.projection_dim = projection_dim
+        self.type_sample = type_sample
+        if type_sample == "Gaussian":
+            self.projection = RandomProjection.random_gaussian_matrix(original_dimension, projection_dim)
+        else:
+            self.projection = RandomProjection.random_rademacher_matrix(original_dimension, projection_dim)
 
     @staticmethod
     def random_gaussian_matrix(d: int, projection_dim: int) -> np.ndarray:
         """Creates a random Gaussian matrix."""
-        pass
+        return GaussianRandomProjection(n_components=projection_dim).fit_transform(np.eye(d))
 
     @staticmethod
     def random_rademacher_matrix(d: int, projection_dim: int) -> np.ndarray:
@@ -52,7 +61,7 @@ class RandomProjection:
 
     def projection_quality(self, dataset: Dataset) -> tuple[float, float]:
         """Computes the quality of the projection."""
-        pass
+        return self.mean_dist(dataset.instances), self.mean_dist(self.project(dataset).instances)
 
     def project(self, dataset: Dataset) -> Dataset:
         """Projects a dataset to a lower dimension."""
