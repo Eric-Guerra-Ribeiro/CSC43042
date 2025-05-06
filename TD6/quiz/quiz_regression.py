@@ -30,7 +30,7 @@ def normalize(train_data, test_data, col_regr, method='mean_std'):
     # Reattach the target column and return
     return pd.concat([train_data[col_regr], normalized_train], axis=1), pd.concat([test_data[col_regr], normalized_test], axis=1)
 
-def get_data(base_path="../csv", file_prefix="maisons", feature_cols=None, target=None, norm=False):
+def get_data(base_path="./csv", file_prefix="maisons", feature_cols=None, target=None, norm=False):
     # Validate dataset choice and set target column
     assert file_prefix in ["salary", "maisons"], "Unknown file"
     if target is None:

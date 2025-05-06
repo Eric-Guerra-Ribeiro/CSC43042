@@ -22,7 +22,8 @@ class KnnRegression(Regression):
             col_regr (int): The index of the target (regression) column.
         """
         super().__init__(dataset, col_regr)  # Initialize parent Regression class
-        pass
+        self.m_k = k
+        self.m_kdTree = self._build_kd_tree()
 
     def _build_kd_tree(self) -> KDTree:
         """
@@ -35,16 +36,7 @@ class KnnRegression(Regression):
         n_features: int = self.m_dataset.get_dim() - 1  # Exclude target column
 
         # Initialize an array to store feature vectors.
-        data_pts = np.zeros((n_samples, n_features))
-        
-        # Populate data_pts by iterating through all samples.
-        for i in range(n_samples):
-            j2 = 0  # Tracks original column indices while skipping target column
-            for j in range(n_features):
-                if j2 == self.m_col_regr:
-                    j2 += 1  # Skip the target column in the original dataset
-                data_pts[i, j] = self.m_dataset.get_instance(i)[j2]
-                j2 += 1
+        data_pts = np.delete(self.m_dataset.data, self.m_col_regr, 1)
 
         return KDTree(data_pts)
 
@@ -64,7 +56,7 @@ class KnnRegression(Regression):
 
         # Query KDTree for k nearest neighbors.
         distances, indices = self.m_kdTree.query(x, k=self.m_k)
-        pass
+        return np.mean(self.m_dataset.data[indices, self.m_col_regr])
 
     def get_k(self) -> int:
         """

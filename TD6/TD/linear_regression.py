@@ -32,8 +32,16 @@ class LinearRegression(Regression):
             np.ndarray: The design matrix X.
         """
         # Ensure the dataset has more than one dimension.
+        dim = self.m_dataset.get_dim()
+        assert dim > 1
+
+        if self.fit_intercept:
+            design_mtx = np.ones((self.m_dataset.get_nbr_samples(), dim))
+            design_mtx[:,1:] = np.delete(self.m_dataset.data, self.m_col_regr, 1)
+            return design_mtx
+        return np.delete(self.m_dataset.data, self.m_col_regr, 1)
+
         
-        pass
 
     def construct_y(self) -> np.ndarray:
         """
@@ -43,17 +51,22 @@ class LinearRegression(Regression):
             np.ndarray: The target vector y.
         """
         # Ensure the dataset has more than one dimension.
+            # Ensure the dataset has more than one dimension.
+        dim = self.m_dataset.get_dim()
+        assert dim > 1
         
-        pass
+        return self.m_dataset.data[:, self.m_col_regr]
 
     def set_coefficients(self) -> None:
         """
         Compute and set the regression coefficients using the least squares solution.
         """
         # Ensure the dataset has more than one dimension.
-        
+                # Ensure the dataset has more than one dimension.
+        dim = self.m_dataset.get_dim()
+        assert dim > 1
         # Compute the least squares solution for the coefficients.
-        pass
+        self.m_beta = np.linalg.lstsq(self.construct_matrix(), self.construct_y(), rcond=None)[0]
 
     def get_coefficients(self) -> Optional[np.ndarray]:
         """
@@ -102,8 +115,29 @@ class LinearRegression(Regression):
         # Ensure the dataset has the same dimensions as the training dataset.
         assert dataset.get_dim() == self.m_dataset.get_dim(), "Datasets must have the same dimensions."
         n: int = dataset.get_nbr_samples()
-        d: int = dataset.get_dim()
-        pass
+        dim: int = dataset.get_dim()
+        
+        assert dim > 1
+
+        if self.fit_intercept:
+            design_mtx = np.ones((dataset.get_nbr_samples(), dim))
+            design_mtx[:,1:] = np.delete(dataset.data, self.m_col_regr, 1)
+        else:
+            design_mtx = np.delete(dataset.data, self.m_col_regr, 1)
+        
+        y_vector = dataset.data[:, self.m_col_regr]
+
+        avg_y = np.mean(y_vector)
+
+        y_estimated = design_mtx@self.m_beta
+
+        norm_squared = lambda x: np.dot(x, x)
+
+        tss = norm_squared(y_vector - avg_y)
+        ess = norm_squared(y_estimated - avg_y)
+        rss = norm_squared(y_vector - y_estimated)
+
+        return tss, ess, rss
 
     def estimate(self, x: np.ndarray) -> float:
         """
@@ -115,5 +149,14 @@ class LinearRegression(Regression):
         Returns:
             float: The predicted target value.
         """
-        pass
+        # Verify that the input vector x has the correct dimension (i.e., x.size should equal dataset.get_dim() - 1).
+        assert x.size == self.m_dataset.get_dim() - 1
+        # Check that the regression coefficients have been computed (i.e., self.m_beta is not None).
+        assert self.m_dataset is not None
+
+        x_copy = x[:]
+
+        if self.fit_intercept:
+            x_copy = np.concatenate((np.ones(1), x_copy))
+        return np.dot(x_copy, self.m_beta)
 
