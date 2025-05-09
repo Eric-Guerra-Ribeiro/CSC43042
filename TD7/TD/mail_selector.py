@@ -16,5 +16,15 @@ class MailSelector:
         
         train_data = Dataset(self.train_file)
         test_data = Dataset(self.test_file)
-        pass
+        
+        svm = SVM(train_data, 0, Kernel(self.kernel_type, gamma=self.gamma))
+        svm.train(self.C)
 
+        conf_mtx = svm.test(test_data)
+
+        detection_rate = conf_mtx.detection_rate()
+        false_alarm_rate = conf_mtx.false_alarm_rate()
+        precision = conf_mtx.precision()
+        f_score = conf_mtx.f_score()
+        
+        return detection_rate, false_alarm_rate, precision, f_score   

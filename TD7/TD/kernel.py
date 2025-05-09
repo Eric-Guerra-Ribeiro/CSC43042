@@ -57,23 +57,35 @@ class Kernel:
 
     def _kernel_linear(self, x1: np.ndarray, x2: np.ndarray) -> float:
         """Computes the linear kernel."""
-        pass
+        x1 = np.array(x1)
+        x2 = np.array(x2)
+        return np.dot(x1, x2)
 
     def _kernel_poly(self, x1: np.ndarray, x2: np.ndarray) -> float:
         """Computes the polynomial kernel."""
-        pass
+        x1 = np.array(x1)
+        x2 = np.array(x2)
+        return (self.gamma*np.dot(x1, x2) + self.coef0)**self.degree
 
     def _kernel_rbf(self, x1: np.ndarray, x2: np.ndarray) -> float:
         """Computes the RBF (Gaussian) kernel."""
-        pass
+        x1 = np.array(x1)
+        x2 = np.array(x2)
+        norm_squared = lambda x: np.dot(x, x)
+        return np.exp(-self.gamma*norm_squared(x1 - x2))
 
     def _kernel_sigmoid(self, x1: np.ndarray, x2: np.ndarray) -> float:
         """Computes the sigmoid kernel."""
-        pass
+        x1 = np.array(x1)
+        x2 = np.array(x2)
+        return np.tanh(self.gamma*np.dot(x1, x2) + self.coef0)
 
     def _kernel_ratquad(self, x1: np.ndarray, x2: np.ndarray) -> float:
         """Computes the rational quadratic kernel."""
-        pass
+        x1 = np.array(x1)
+        x2 = np.array(x2)
+        norm_squared = lambda x: np.dot(x, x)
+        return self.coef0/(norm_squared(x1 - x2) + self.coef0)
 
     def get_kernel_type(self) -> KernelType:
         """Returns the kernel type."""
